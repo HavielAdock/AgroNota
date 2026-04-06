@@ -1,4 +1,4 @@
-const API = 'http://127.0.0.1:8000';
+const API = 'https://agronota-backend.onrender.com';
 
 let token = localStorage.getItem('agronota_token');
 let usuario = JSON.parse(localStorage.getItem('agronota_usuario') || 'null');
