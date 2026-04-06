@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroNota — Emissão de NF-e</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div style="position:fixed; top:12px; left:16px; z-index:999; font-size:0.72rem; color:rgba(255,255,255,0.25); font-family:'DM Sans',sans-serif; letter-spacing:0.03em;">
+    Desenvolvido por <a href="https://instagram.com/lucas_garciaa0" target="_blank" style="color:rgba(255,255,255,0.5); text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.2);">@lucas_garciaa0</a>
+  </div>
+
+  <div class="bg-fantasma">
+    <div class="bg-fantasma-extra"></div>
+  </div>
+
+  <!-- TELA LOGIN -->
+  <div id="tela-login" class="tela ativa">
+    <div class="login-container">
+      <div class="login-logo">
+        <div class="icone">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C9.5 2 7 4 6 6.5C4 7 2 9 2 11.5C2 14.5 4.5 17 7.5 17H9v2H7v2h10v-2h-2v-2h1.5C19.5 17 22 14.5 22 11.5C22 9 20 7 18 6.5C17 4 14.5 2 12 2Z"/>
+          </svg>
+        </div>
+        <h1>Agro<span>Nota</span></h1>
+        <p>Sistema de Emissão de NF-e Rural</p>
+      </div>
+      <div class="card">
+        <div class="campo">
+          <label>E-mail</label>
+          <input type="email" id="login-email" placeholder="seu@email.com" />
+        </div>
+        <div class="campo">
+          <label>Senha</label>
+          <input type="password" id="login-senha" placeholder="••••••••" />
+        </div>
+        <button class="btn-primario" id="btn-entrar">Entrar</button>
+        <div id="login-erro" class="erro-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA DASHBOARD -->
+  <div id="tela-dashboard" class="tela">
+    <nav class="navbar">
+      <div class="navbar-logo">Agro<span>Nota</span></div>
+      <div class="navbar-usuario">
+        <span id="navbar-nome">Carregando...</span>
+        <button class="btn-sair" id="btn-sair">Sair</button>
+      </div>
+    </nav>
+
+    <div class="dashboard-content">
+      <h1 class="dashboard-titulo">Emitir Nota Fiscal</h1>
+      <p class="dashboard-subtitulo">Selecione o tipo de operação para começar</p>
+
+      <div class="operacao-grid">
+        <div class="operacao-card" id="card-interna" onclick="selecionarOperacao('interna')">
+          <span class="icone-op">🌾</span>
+          <h3>Dentro do Estado</h3>
+          <p>Venda para cliente no mesmo estado que você</p>
+          <span class="cfop-badge">CFOP 5.105</span>
+        </div>
+        <div class="operacao-card" id="card-interestadual" onclick="selecionarOperacao('interestadual')">
+          <span class="icone-op">🚛</span>
+          <h3>Para Outro Estado</h3>
+          <p>Venda para cliente em estado diferente do seu</p>
+          <span class="cfop-badge">CFOP 6.105</span>
+        </div>
+      </div>
+
+      <div class="form-nota" id="form-nota">
+        <h2 id="form-titulo">Nova Nota Fiscal</h2>
+
+        <div class="form-grid">
+
+          <div class="campo campo-full">
+            <label>Cliente</label>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <select id="nota-cliente" style="flex:1">
+                <option value="">Selecione um cliente...</option>
+              </select>
+              <button class="btn-secundario" onclick="abrirModalCliente()" type="button" style="white-space:nowrap">+ Novo</button>
+            </div>
+          </div>
+
+          <div class="campo campo-full">
+            <label>Produto</label>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <select id="nota-produto" style="flex:1">
+                <option value="">Selecione um produto...</option>
+              </select>
+              <button class="btn-secundario" onclick="abrirModalProduto()" type="button" style="white-space:nowrap">+ Novo</button>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label>Quantidade</label>
+            <input type="number" id="nota-quantidade" placeholder="0" min="0" step="0.001" />
+          </div>
+
+          <div class="campo">
+            <label>Valor Unitário (R$)</label>
+            <input type="number" id="nota-valor" placeholder="0,00" min="0" step="0.01" />
+          </div>
+
+        </div>
+
+        <div class="total-box">
+          <span class="total-label">Total da Nota</span>
+          <span class="total-valor" id="total-display">R$ 0,00</span>
+        </div>
+
+        <button class="toggle-fiscal" id="toggle-fiscal" onclick="toggleFiscal()">
+          ▼ ver detalhes fiscais
+        </button>
+
+        <div class="painel-fiscal" id="painel-fiscal">
+          <h4>Detalhes Fiscais — calculados automaticamente</h4>
+          <div class="fiscal-grid">
+            <div class="fiscal-item">
+              <span class="f-label">CFOP</span>
+              <span class="f-valor" id="f-cfop">—</span>
+            </div>
+            <div class="fiscal-item">
+              <span class="f-label">ICMS</span>
+              <span class="f-valor" id="f-icms">—</span>
+            </div>
+            <div class="fiscal-item">
+              <span class="f-label">DIFAL</span>
+              <span class="f-valor" id="f-difal">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alerta-gnre" id="alerta-gnre">
+          <p id="alerta-gnre-texto"></p>
+        </div>
+
+        <div id="nota-erro" class="erro-msg"></div>
+        <div id="nota-sucesso" class="sucesso-msg"></div>
+
+        <div class="form-acoes">
+          <button class="btn-primario" id="btn-calcular" onclick="calcularNota()">Calcular impostos</button>
+          <button class="btn-primario" id="btn-emitir" onclick="emitirNota()" style="display:none">Emitir Nota Fiscal →</button>
+          <button class="btn-secundario" onclick="limparForm()">Limpar</button>
+        </div>
+      </div>
+
+      <div class="historico-lista" id="historico-lista">
+        <h3>Últimas Notas Emitidas</h3>
+        <div id="historico-items">
+          <p style="color: var(--texto-claro); font-size: 0.875rem;">Nenhuma nota emitida ainda.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CLIENTE -->
+  <div id="modal-cliente" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+    <div class="card" style="width:100%; max-width:480px; margin:1rem;">
+      <h3 style="font-family:'Playfair Display',serif; color:var(--branco); margin-bottom:1.5rem;">Novo Cliente</h3>
+      <div class="campo">
+        <label>CPF ou CNPJ</label>
+        <input type="text" id="cli-cpf" placeholder="000.000.000-00" />
+      </div>
+      <div class="campo">
+        <label>Nome / Razão Social</label>
+        <input type="text" id="cli-nome" placeholder="Nome completo" />
+      </div>
+      <div class="form-grid">
+        <div class="campo">
+          <label>Estado (UF)</label>
+          <select id="cli-uf">
+            <option value="">Selecione...</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option selected>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Cidade</label>
+          <input type="text" id="cli-cidade" placeholder="Cidade" />
+        </div>
+      </div>
+      <div class="campo">
+        <label>Inscrição Estadual (opcional)</label>
+        <input type="text" id="cli-ie" placeholder="Deixe em branco se não tiver" />
+      </div>
+      <div class="campo">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+          <input type="checkbox" id="cli-contribuinte" style="width:auto;" />
+          Contribuinte de ICMS
+        </label>
+      </div>
+      <div id="cli-erro" class="erro-msg"></div>
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <button class="btn-primario" onclick="salvarCliente()" type="button">Salvar Cliente</button>
+        <button class="btn-secundario" onclick="fecharModalCliente()" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRODUTO -->
+  <div id="modal-produto" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); align-items:center; justify-content:center;">
+    <div class="card" style="width:100%; max-width:480px; margin:1rem;">
+      <h3 style="font-family:'Playfair Display',serif; color:var(--branco); margin-bottom:1.5rem;">Novo Produto</h3>
+      <div class="campo">
+        <label>Nome do Produto</label>
+        <input type="text" id="pro-nome" placeholder="Ex: Semente de Soja" />
+      </div>
+      <div class="form-grid">
+        <div class="campo">
+          <label>NCM</label>
+          <input type="text" id="pro-ncm" placeholder="00000000" maxlength="8" />
+        </div>
+        <div class="campo">
+          <label>Unidade</label>
+          <select id="pro-unidade">
+            <option value="KG">KG — Quilograma</option>
+            <option value="SC">SC — Saca</option>
+            <option value="TON">TON — Tonelada</option>
+            <option value="UN">UN — Unidade</option>
+            <option value="L">L — Litro</option>
+            <option value="CX">CX — Caixa</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Valor Unitário Padrão (opcional)</label>
+        <input type="number" id="pro-valor" placeholder="0,00" min="0" step="0.01" />
+      </div>
+      <div class="campo">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+          <input type="checkbox" id="pro-beneficio" style="width:auto;" />
+          Possui benefício fiscal (isenção de ICMS)
+        </label>
+      </div>
+      <div id="pro-erro" class="erro-msg"></div>
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <button class="btn-primario" onclick="salvarProduto()" type="button">Salvar Produto</button>
+        <button class="btn-secundario" onclick="fecharModalProduto()" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
